@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
 from enum import Enum
+from types import MappingProxyType
 from typing import TypeAlias
 from uuid import UUID, uuid4
 
@@ -120,10 +122,29 @@ class ItemInstance:
     id: UUID = field(default_factory=uuid4)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, init=False)
 class Inventory:
-    items: dict[UUID, ItemInstance] = field(default_factory=dict)
-    consumables: dict[str, int] = field(default_factory=dict)
+    items: dict[UUID, ItemInstance]
+    _consumables: dict[str, int]
+    _reservations: dict[UUID, tuple[str, int]] = field(repr=False)
+
+    def __init__(self, items: dict[UUID, ItemInstance] | None = None,
+                 consumables: Mapping[str, int] | None = None):
+        self.items = dict(items) if items is not None else {}
+        self._consumables = {}
+        self._reservations = {}
+        for definition_id, amount in (consumables or {}).items():
+            self.add_consumable(definition_id, amount)
+
+    @property
+    def consumables(self) -> Mapping[str, int]:
+        """Total stock, including quantities reserved for active participants."""
+        return MappingProxyType(self._consumables)
+
+    def _available(self, definition_id: str) -> int:
+        reserved = sum(amount for item_id, amount in self._reservations.values()
+                       if item_id == definition_id)
+        return self._consumables.get(definition_id, 0) - reserved
 
     def add_item(self, definition_id: str) -> UUID:
         item = ItemInstance(definition_id=definition_id)
@@ -133,15 +154,32 @@ class Inventory:
     def add_consumable(self, definition_id: str, amount: int) -> None:
         if amount < 0:
             raise ValueError('Amount must be nonnegative')
-        self.consumables[definition_id] = self.consumables.get(definition_id, 0) + amount
+        self._consumables[definition_id] = self._consumables.get(definition_id, 0) + amount
 
     def consume(self, definition_id: str, amount: int = 1) -> None:
-        if amount < 0 or self.consumables.get(definition_id, 0) < amount:
+        if amount < 0 or self._available(definition_id) < amount:
             raise ValueError('Not enough consumables')
-        self.consumables[definition_id] -= amount
+        self._consumables[definition_id] = self._consumables.get(definition_id, 0) - amount
+
+    def _reserve(self, owner_id: UUID, definition_id: str, amount: int) -> None:
+        if owner_id in self._reservations:
+            raise ValueError('Participant already has a reservation')
+        if amount < 0 or self._available(definition_id) < amount:
+            raise ValueError('Not enough consumables')
+        self._reservations[owner_id] = (definition_id, amount)
+
+    def _consume_reserved(self, owner_id: UUID, definition_id: str) -> None:
+        reserved_id, amount = self._reservations.get(owner_id, (None, 0))
+        if reserved_id != definition_id or amount < 1 or self._consumables.get(definition_id, 0) < 1:
+            raise ValueError('Not enough reserved consumables')
+        self._consumables[definition_id] -= 1
+        self._reservations[owner_id] = (definition_id, amount - 1)
+
+    def _release(self, owner_id: UUID) -> None:
+        self._reservations.pop(owner_id, None)
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class EquippedSlots:
     weapon: UUID | None = None
     armor: UUID | None = None
@@ -150,13 +188,34 @@ class EquippedSlots:
     superpower: UUID | None = None
     potion_id: str | None = None
 
+    def __post_init__(self) -> None:
+        instances = [item_id for item_id in (
+            self.weapon, self.armor, self.accessory1, self.accessory2, self.superpower,
+        ) if item_id is not None]
+        if len(instances) != len(set(instances)):
+            raise ValueError('Item cannot be equipped twice')
 
-@dataclass(slots=True)
+
+@dataclass(slots=True, init=False)
 class Character:
     name: str
-    id: UUID = field(default_factory=uuid4)
-    inventory: Inventory = field(default_factory=Inventory)
-    slots: EquippedSlots = field(default_factory=EquippedSlots)
+    id: UUID
+    inventory: Inventory
+    _slots: EquippedSlots
+
+    def __init__(self, name: str, id: UUID | None = None,
+                 inventory: Inventory | None = None, slots: EquippedSlots | None = None):
+        self.name = name
+        self.id = id if id is not None else uuid4()
+        self.inventory = inventory if inventory is not None else Inventory()
+        self._slots = slots if slots is not None else EquippedSlots()
+
+    @property
+    def slots(self) -> EquippedSlots:
+        return self._slots
+
+    def _set_slot(self, slot: str, item_id: UUID | str | None) -> None:
+        self._slots = replace(self._slots, **{slot: item_id})
 
 
 @dataclass(frozen=True, slots=True)
@@ -198,6 +257,7 @@ class BattleParticipant:
     effects: list[ActiveEffect] = field(default_factory=list)
     active: bool = True
     character_id: UUID | None = None
+    _inventory: Inventory | None = field(default=None, repr=False, compare=False)
 
     def is_alive(self) -> bool:
         return self.active and self.current_hp > 0
@@ -207,6 +267,21 @@ class BattleParticipant:
         bonuses += [e.bonus for e in self.effects
                     if e.starts_round <= round_number <= e.ends_round]
         return BASE_STATS.with_bonuses(bonuses)
+
+    def _consume_potion(self) -> None:
+        if self.equipment.potion is None or self.potions_left < 1:
+            raise ValueError('Not enough potions')
+        if self._inventory is not None:
+            self._inventory._consume_reserved(self.id, self.equipment.potion.id)
+        self.potions_left -= 1
+
+    def _release_potions(self) -> None:
+        if self._inventory is not None:
+            self._inventory._release(self.id)
+
+    def _start_round(self, round_number: int) -> None:
+        self.effects = [effect for effect in self.effects if effect.ends_round >= round_number]
+        self.current_hp = max(0, min(self.current_hp, self.stats(round_number).max_health))
 
 
 @dataclass(frozen=True, slots=True)

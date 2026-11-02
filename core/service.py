@@ -61,10 +61,12 @@ class GameService:
         if slot not in valid:
             raise ValueError('Unknown equipment slot')
         if slot == 'potion_id':
-            if item_id is not None and \
-                not isinstance(item_id, str) or not isinstance(self.catalog.items[item_id], Potion): # type: ignore
+            if item_id is None:
+                character._set_slot(slot, None)
+                return
+            if not isinstance(item_id, str) or not isinstance(self.catalog.items.get(item_id), Potion):
                 raise ValueError('Invalid potion')
-            slots.potion_id = item_id
+            character._set_slot(slot, item_id)
             return
         if item_id is not None:
             if not isinstance(item_id, UUID) or item_id not in character.inventory.items:
@@ -75,7 +77,7 @@ class GameService:
             other = [getattr(slots, name) for name in valid if name != slot and name != 'potion_id']
             if item_id in other:
                 raise ValueError('Item cannot be equipped twice')
-        setattr(slots, slot, item_id)
+        character._set_slot(slot, item_id)
 
     def character_equipment(self, character: Character) -> Equipment:
         slots = character.slots
@@ -102,7 +104,7 @@ class GameService:
         hero = BattleParticipant(
             id=hero_id, name=character.name, team_id='heroes', controller=Controller.HUMAN,
             equipment=equipment, current_hp=self._max_hp(equipment),
-            potions_left=hero_potions, character_id=character_id,
+            potions_left=hero_potions, character_id=character_id, _inventory=character.inventory,
         )
         monster = BattleParticipant(
             id=monster_id, name=f'{spawn.rarity.label} {spawn.definition.name}',
@@ -116,8 +118,15 @@ class GameService:
             location_id=location_id, monster_id=spawn.definition.id,
             monster_rarity=spawn.rarity,
         )
-        self.store.battles[battle.id] = battle
-        self._fill_ai_actions(battle)
+        if equipment.potion is not None:
+            character.inventory._reserve(hero_id, equipment.potion.id, hero_potions)
+        try:
+            self.store.battles[battle.id] = battle
+            self._fill_ai_actions(battle)
+        except Exception:
+            hero._release_potions()
+            self.store.battles.pop(battle.id, None)
+            raise
         return battle
 
     @staticmethod
@@ -158,13 +167,6 @@ class GameService:
                 self.engine.submit_action(battle, actor.id, action)
 
     def _process_events(self, battle: Battle, events: list[CombatEvent]) -> None:
-        for event in events:
-            if event.kind == 'potion_used':
-                actor = battle.participants[event.actor_id]
-                if actor.character_id is not None:
-                    potion = actor.equipment.potion
-                    assert potion is not None
-                    self.store.characters[actor.character_id].inventory.consume(potion.id)
         if battle.status == BattleStatus.FINISHED and not battle.rewards_granted:
             # Only PvE victories against monsters grant random rewards.
             if battle.winner_team == battle.player_team and battle.monster_id is not None:

@@ -171,7 +171,7 @@ class BattleEngine:
         for actor_id, action in actions:
             actor = battle.participants[actor_id]
             if isinstance(action, DrinkPotion):
-                actor.potions_left -= 1
+                actor._consume_potion()
                 actor.potion_ready_round = current_round + actor.equipment.potion.cooldown # type: ignore
             elif isinstance(action, UseSuperpower):
                 actor.superpower_ready_round = current_round + actor.equipment.superpower.cooldown # type: ignore
@@ -192,8 +192,7 @@ class BattleEngine:
         if battle.status == BattleStatus.WAITING:
             battle.round_number += 1
             for actor in battle.participants.values():
-                actor.effects = [effect for effect in actor.effects
-                                 if effect.ends_round >= battle.round_number]
+                actor._start_round(battle.round_number)
         return events
 
     def leave(self, battle: Battle, actor_id) -> list[CombatEvent]:
@@ -205,6 +204,7 @@ class BattleEngine:
         actor.active = False
         battle.actions.pop(actor_id, None)
         battle.cancel_votes.discard(actor_id)
+        actor._release_potions()
         events = [CombatEvent(f'{actor.name} покидает бой.', 'leave', actor_id)]
         self._finish_if_needed(battle, events, empty_team_reason='surrender')
         # If the team remains and all remaining players have acted, resolve normally.
@@ -225,18 +225,25 @@ class BattleEngine:
             battle.status = BattleStatus.CANCELLED
             battle.finish_reason = 'cancelled'
             battle.actions.clear()
+            for participant in battle.participants.values():
+                participant._release_potions()
             events.append(CombatEvent('Бой отменён, добыча не выдаётся.', 'cancelled'))
         return events
 
     @staticmethod
     def _finish_if_needed(battle: Battle, events: list[CombatEvent],
                           empty_team_reason: str = 'combat') -> None:
+        for participant in battle.participants.values():
+            if not participant.is_alive():
+                participant._release_potions()
         teams = battle.teams_alive()
         if len(teams) > 1:
             return
         battle.status = BattleStatus.FINISHED
         battle.winner_team = next(iter(teams)) if teams else None
         battle.finish_reason = empty_team_reason
+        for participant in battle.participants.values():
+            participant._release_potions()
         if not teams:
             events.append(CombatEvent('Обе команды выбыли. Ничья.', 'finished'))
         else:
