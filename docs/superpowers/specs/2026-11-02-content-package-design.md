@@ -8,11 +8,14 @@
 NPC/персонажей и сюжетные заготовки, получить небольшой JSON и проверить его
 перед добавлением в мир. Данные мира хранятся отдельно от Python-кода.
 
-`rpg_content` — отдельный импортируемый Python-пакет верхнего уровня внутри
-существующей distribution `telegram-rpg-core`. Отдельный PyPI-проект, репозиторий
-или цикл релизов для v1 не требуются. Пакет не импортирует `core` и не требует
-Telegram, нейросетевых API, базы данных или сторонних runtime-зависимостей.
+`rpg_content` — независимый импортируемый пакет в собственной distribution
+`rpg-content` версии `0.1.0`, Python >= 3.10, со стандартной библиотекой в runtime.
+Он поставляется из того же репозитория, но собирается и устанавливается отдельно
+от `telegram-rpg-core`. Публикация на PyPI не входит в задачу. Пакет не зависит
+от `core`, `main`, Telegram, нейросетевых API или базы данных и не импортирует их.
 Его модели описывают контент, а не состояние игрока или боя.
+ID транспорта (Telegram user/chat/message ID и аналогичные CLI-привязки)
+не входят в схему контента; их хранение относится к adapter/store приложения.
 
 В v1 нет исполнения квестов, условий, наград сюжета, диалоговых ветвлений,
 сохранений, генерации через API, наследования записей и шаблонизатора.
@@ -21,34 +24,141 @@ NPC, реплики и сюжет — проверяемые данные для
 ## Размещение и публичная граница
 
 ```text
-rpg_content/
-  __init__.py       # публичные load, validate, merge, build_context
-  __main__.py       # python -m rpg_content
-  models.py        # собственные модели контента
-  validation.py    # JSON, типы, диапазоны, ссылки
-  io.py            # чтение и атомарная запись
-  merge.py
-  context.py
-  resources/
-    common.md      # общие короткие правила генерации
-    items.md       # аналогично для остальных пяти секций
-    examples/      # по одному минимальному JSON-примеру на секцию
-core/content_adapter.py # единственная граница преобразования в Catalog
-content/demo.json       # перенесённый демонстрационный мир
+packages/rpg_content/
+  pyproject.toml   # distribution rpg-content 0.1.0, собственная сборка
+  src/rpg_content/
+    __init__.py    # публичные функции, модели и ошибки
+    __main__.py    # тонкий python -m rpg_content adapter
+    models.py      # immutable definitions, ContentRef, ContentDocument, ContentWorld
+    validation.py  # единые правила полей и проверка графа
+    parser.py      # JSON text -> detached ContentDocument
+    io.py          # чтение и атомарная запись
+    merge.py
+    context.py
+    resources/
+      common.md
+      items.md     # аналогично для остальных пяти секций
+      examples/    # по одному минимальному JSON-примеру на секцию
+core/content_adapter.py # to_catalog(world) -> Catalog
+content/demo.json       # внешний демонстрационный мир
 ```
 
-`load(path)` читает и проверяет замкнутый мир; `validate(document, base=None)`
-проверяет документ либо дополнение относительно проверенной базы.
-`merge(documents)` возвращает проверенный объединённый мир;
-`build_context(world, ...)` возвращает текст или структурированную ошибку.
-Ошибки содержат имя файла, JSON-путь, код и короткое объяснение.
-Модели и ошибки доступны через `rpg_content`, внутренние модули не часть API.
+Wheel `rpg-content` содержит только `rpg_content`, его ресурсы и служебные
+метаданные distribution. Ресурсы читаются через `importlib.resources`.
+Потребитель устанавливает локальный исходник командой
+`python -m pip install ./packages/rpg_content` либо устанавливает собранный wheel.
+Мир передаётся явным путём: пакет не ищет его в текущем каталоге и не узнаёт
+автоматически, какой мир использует запущенная игра. `content/demo.json`
+остаётся внешним файлом и не входит в wheel пакета.
 
-Ресурсы инструкций входят в wheel и читаются через `importlib.resources`.
-Файлы мира передаются явным путём: пакет не ищет мир в текущем каталоге.
-При реализации исправить `packages = ["telegram_rpg"]` в `pyproject.toml`:
-реальный пакет игры называется `core`; установка должна включать `core`,
-`rpg_content` и его ресурсы. `content/demo.json` остаётся внешним файлом.
+Корневая distribution `telegram-rpg-core` исправляет `packages = ["telegram_rpg"]`
+на `packages = ["core"]` и объявляет зависимость `rpg-content>=0.1,<0.2`.
+Локальная установка обоих проектов: `python -m pip install ./packages/rpg_content .`.
+Wheel игры содержит `core`, но не вторую копию `rpg_content`.
+
+## Публичные модели и операции
+
+Все модели, ошибки и перечисленные функции экспортируются из `rpg_content`;
+потребитель не обращается к внутренним модулям. `Definition` означает union
+`ItemDefinition | MonsterDefinition | LocationDefinition | LootTableDefinition |
+NpcDefinition | StorySeedDefinition`.
+
+`ContentRef(section, id)` — типизированный immutable value object, где section
+ограничена шестью секциями. `ContentRef.parse(text: str) -> ContentRef` проверяет
+синтаксис `секция:id`; существование цели проверяется на уровне мира.
+Ссылки внутри публичных definitions представлены ContentRef, а не сырыми
+JSON-строками; nullable-поля сохраняют None по контракту. Например,
+`world.resolve(npc.location)` работает после проверки `npc.location is not None`.
+`ContentDocument` — структурно валидный detached документ: типы, локальные
+диапазоны, уникальность ID внутри секций и синтаксис ссылок уже проверены,
+но цели ссылок могут находиться в другом документе.
+
+`ContentWorld` — целостный глубоко неизменяемый snapshot. Его read-only свойства:
+
+| Свойство | Тип |
+| --- | --- |
+| `schema_version` | `int` (в v1 только 1) |
+| `canon` | `str` |
+| `items` | `Mapping[str, ItemDefinition]` |
+| `monsters` | `Mapping[str, MonsterDefinition]` |
+| `locations` | `Mapping[str, LocationDefinition]` |
+| `loot_tables` | `Mapping[str, LootTableDefinition]` |
+| `npcs` | `Mapping[str, NpcDefinition]` |
+| `story_seeds` | `Mapping[str, StorySeedDefinition]` |
+
+Mapping сохраняют порядок документа/объединения. `world.locations.values()` и
+`world.npcs.values()` перечисляют все записи, включая narrative-локации и NPC
+без location. Генераторный scope контекста не ограничивает публичное чтение мира.
+`world.locations[id]` и аналогичный доступ к остальным mapping возвращают
+типизированное определение; отсутствующий ключ вызывает стандартный `KeyError`.
+
+`world.resolve(ref: ContentRef) -> Definition` разрешает ссылку. Отсутствующая
+цель вызывает доменную `UnknownContentReference` с section/id.
+`world.npcs_at(location_id: str) -> tuple[NpcDefinition, ...]` возвращает NPC
+в порядке мира: для известной локации без NPC — `()`, для неизвестной —
+`UnknownContentReference` на `locations:location_id`. Эти convenience methods
+намеренно дают доменную диагностику, тогда как mapping сохраняют контракт Python.
+
+Definitions и вложенные value objects проверяют локальные invariants при каждом
+публичном конструировании. Все коллекции, в том числе loadouts, бонусы, refs,
+реплики и вложенные записи, защищены рекурсивно: tuple и read-only mapping
+над собственными defensive copies. Наружу не возвращаются изменяемые dict
+или ссылки на изменяемый вход. `frozen=True` сам по себе этого не обеспечивает.
+Для `ContentDocument` действуют те же правила владения данными.
+
+Выбран простой контракт: публичный конструктор `ContentWorld` всегда проверяет
+полный граф, соответствие ключей mapping ID определений и все межсекционные
+ограничения, независимо от того, создан ли мир через parser или вручную.
+Публичного unchecked/validated bypass конструктора нет. Поэтому нельзя получить
+мир с висячей ссылкой прямым вызовом frozen dataclass.
+
+```text
+parse(text: str, source: str = "<memory>") -> ContentDocument
+load(path: str | Path) -> ContentWorld
+validate(document: ContentDocument, base: ContentWorld | None = None) -> ContentWorld
+merge(documents: Iterable[ContentDocument]) -> ContentWorld
+build_context(world: ContentWorld, *, section: str, task: str, refs: tuple[ContentRef, ...] = (), index_refs: tuple[ContentRef, ...] = (), max_chars: int) -> str
+```
+
+`parse` выполняет JSON- и структурную проверку без разрешения внешних ссылок.
+`load` читает файл, затем выполняет parse и полную validate.
+`validate(document)` создаёт замкнутый мир; с `base` создаёт новый мир из базы
+и дополнения по add-only правилам merge, не меняя базу. `merge` проверяет полный
+объединённый граф после структурной проверки каждого документа; пустой iterable
+даёт пустой мир schema_version 1 с пустым canon. Ни одна операция не изменяет вход.
+
+Ошибки данных принадлежат публичной иерархии `ContentError`, содержат source,
+JSON-путь, код и короткое объяснение; `UnknownContentReference` — её подтип.
+Для программного создания source равен `<memory>`. Ошибки I/O также переводятся
+в публичную ошибку с source и кодом. Библиотека не печатает, не логирует и не
+завершает процесс и не обращается к сети. `parse`, `validate` и `merge` — чистые
+функции; `load` читает внешний файл мира. `build_context` самодостаточен для
+внешнего Python-клиента: сам читает только собственные bundled rule/example
+ресурсы через `importlib.resources`. Это ограниченный I/O, поэтому функция
+не называется чистой. CLI вызывает тот же публичный API и не собирает правила
+сам; он отвечает за вывод, диагностику размера, exit codes и запись output.
+
+В `build_context` section должна быть одной из шести секций, task — непустой
+строкой после trim, max_chars — положительным int, причём bool отклоняется.
+Пустые tuple refs/index_refs соответствуют CLI `--no-refs`/`--no-index`.
+При превышении бюджета возбуждается публичная `ContextBudgetExceeded`, подтип
+`ContentError`, с `actual_chars` и `max_chars`; частичный результат не возвращается.
+
+## Объектная модель и ответственность
+
+Небольшие immutable модели компонуются: value objects владеют локальными
+invariants, `ContentWorld` предоставляет чтение и разрешение связей и гарантирует
+целостность графа. Parser отвечает за перевод JSON, I/O adapter — за файлы,
+CLI adapter — за аргументы и диагностику. Правила полей предметов по kind
+имеют единый источник в пакете: конструкторы и validator используют общий контракт,
+а инструкции и примеры проверяются на соответствие ему тестами. Раздельные копии
+правил в моделях, validator и prompt не поддерживаются.
+
+Новый NPC — новая запись данных, без отдельного подкласса. Общая базовая Entity
+с CRUD или Telegram-методами не вводится. Repository, EventBus и DI-container
+не требуются для этих сценариев. Критерий дизайна — ясные обязанности,
+проверяемые invariants и независимость потребителей, без обещания формального
+полного SOLID или «идеального ООП».
 
 ## JSON-контракт v1
 
@@ -172,7 +282,8 @@ kind/бонусы/эффекты предмета, loadouts монстра, та
 Canon — авторский краткий текст из envelope, без автоматического пересказа мира.
 `--max-chars` обязателен, положительное целое: считать Unicode-символы всего
 итогового текста, включая инструкции и переводы строк. При превышении отказать
-без усечения; сообщить размер и лимит. Всегда сообщать размер в stderr.
+без усечения; ошибка содержит размер и лимит. CLI всегда сообщает размер
+в stderr; библиотечный `build_context` ничего не печатает.
 Обещания точного числа токенов нет: оно зависит от внешней модели.
 
 ## CLI и сохранение
@@ -194,27 +305,118 @@ Exit codes: 0 — успех; 1 — данные/ссылки/конфликт/�
 заменяет её после успешных проверок; при ошибке старый файл остаётся целым.
 Output не может совпадать с входным файлом. JSON-вывод детерминированный UTF-8.
 
-## Встраивание и критерии приёмки
+## Встраивание и смена транспорта
 
-Адаптер преобразует четыре механические секции в существующие классы Catalog;
-описания, narrative-локации, NPC и story_seeds остаются доступны в мире пакета.
-`create_content()` сохраняет сигнатуру и возвращает Catalog через загрузку
-demo.json по пути от файла main.py и адаптер. Сохранить все прежние ID,
-числа и порядок спавнов, добычи и редкостей, чтобы seed давал прежний результат.
+`core.content_adapter.to_catalog(world: ContentWorld) -> Catalog` — единственная
+граница преобразования в игровые классы. Catalog — производная боевая проекция
+четырёх механических секций: содержит только encounter-локации. Adapter создаёт
+собственные core-объекты и коллекции, не разделяя mutable данные с ContentWorld.
+Catalog служит производной проекцией, а не вторым редактируемым источником мира.
+Все описания,
+narrative-локации, NPC и story_seeds доступны через исходный ContentWorld.
+`NpcDefinition` не является `core.Character`: NPC-описание не хранит состояние
+персонажа игрока, экипировки или боя.
 
-При реализации подтвердить следующие критерии:
+Composition root загружает мир один раз, создаёт Catalog и GameService и передаёт
+один и тот же snapshot и сервис presentation adapter. CLI и будущий Telegram
+используют публичные запросы мира для списка NPC/локаций, а игровые команды
+выполняют через GameService. Только GameService управляет изменением runtime
+состояния игроков и боёв, используя существующие engine/store.
 
+```mermaid
+flowchart TD
+    File["Явный путь JSON"] --> Root["Composition root: load один раз"]
+    Root --> World["ContentWorld snapshot"]
+    World --> Projection["to_catalog(world)"]
+    Projection --> Game["GameService"]
+    World --> CLI["CLI adapter(world, game)"]
+    Game --> CLI
+    World --> TG["Будущий Telegram adapter(world, game)"]
+    Game --> TG
+```
+
+Это схема альтернативных transport adapters; Telegram сейчас не реализуется.
+Замена presentation transport при той же композиции сохраняет правила игры
+и доступные сущности. В частности, оба adapter видят все narrative-локации
+из одного snapshot, даже если Catalog не предлагает их как место боя.
+Сохранение игроков между процессами и конкурентные запросы требуют отдельного
+store adapter с соответствующими гарантиями и остаются вне scope v1.
+
+В v1 нет hot reload. Snapshot заменяется только при создании нового экземпляра
+приложения; изменение JSON или установка новой версии контента не меняют активную
+игру. Независимый потребитель получает те же сущности только при явной загрузке
+того же файла; пакет не подключается к live-игре автоматически.
+
+Пример независимого потребителя вне репозитория после установки `rpg-content`
+(локальный `world.json` содержит показанное выше дополнение и может быть пуст
+по locations):
+
+```python
+from rpg_content import load
+
+world = load("world.json")
+for npc in world.npcs.values():
+    print(npc.id, npc.name)
+for location in world.locations.values():
+    print(location.id, location.name)
+    for npc in world.npcs_at(location.id):
+        print(" ", npc.id, npc.name)
+```
+
+В demo `main` загружает ContentWorld один раз по пути от файла `main.py`,
+создаёт Catalog через adapter и передаёт world и GameService в CLI.
+`create_content()` остаётся compatibility wrapper с прежней сигнатурой и
+возвращаемым Catalog: самостоятельно загружает demo и вызывает adapter.
+Основной путь demo не вызывает этот wrapper повторно после собственной загрузки.
+Сохранить все прежние ID, числа и порядок спавнов, добычи и редкостей,
+чтобы фиксированный seed давал прежний результат.
+
+## Критерии приёмки реализации
+
+- Самостоятельно собрать wheel из `packages/rpg_content` и установить его
+  в временный чистый venv. Запустить потребителя из каталога вне репозитория,
+  где есть только явно переданный файл мира и установленный пакет: `core`
+  отсутствует, нет изменения `sys.path`, PYTHONPATH или editable-install.
+  Через публичные imports перечисляются все locations и NPC, включая narrative
+  и NPC без location; проверяются resolve и npcs_at. Wheel содержит все ресурсы,
+  CLI validate/context работают вне репо. Импорт пакета не загружает core/main;
+  зависимости и содержимое wheel не включают игру или Telegram.
+- Собрать wheel игры, проверить зависимость `rpg-content>=0.1,<0.2`, наличие
+  `core` и отсутствие встроенной копии `rpg_content`; локальная установка двух
+  исходных проектов указанной командой работает.
+- Проверить deep immutability всех вложенных моделей/коллекций: попытки записи
+  отклоняются, изменение исходных dict/list после конструирования не меняет мир.
+  Ручное создание definitions нарушающих локальные invariants и ContentWorld
+  с неверным графом отклоняется так же, как ввод через JSON.
+- Два простых независимых потребителя (CLI-shaped и Telegram-shaped fake без
+  настоящего SDK) получают один snapshot и GameService: возвращают одинаковые
+  списки всех locations/NPC, результаты npcs_at/resolve и доменные ошибки.
+  Для сравнения stateful command sequence harness используют два независимых
+  экземпляра GameService, каждый с одинаковым fresh state и собственным Random
+  с одинаковым seed: первый прогон не изменяет состояние второго. Результаты
+  существующего GameService совпадают. Query consumers могут разделять один
+  world/game; реальная композиция сохраняет один GameService на приложение.
+  Проверить пустой npcs_at, неизвестную
+  локацию/цель и стандартный KeyError у mapping. Смена adapter сохраняет игровые
+  правила и доступные сущности; новые механики и runtime NPC instances не вводятся.
 - Существующие 44 теста проходят; demo и --support сохраняют поведение.
+  Сравнены прежний и JSON-каталог, порядки и результаты фиксированных seed;
+  narrative-локация не предлагается движку как место боя. Основной demo путь
+  загружает мир один раз, compatibility wrapper сохраняет контракт.
 - Положительные примеры всех шести секций и отрицательные проверки каждого
   типа ошибки, включая bool вместо числа, неверный kind слота и внешние ссылки.
-- Merge детерминирован, отказывает на дубликатах и не повреждает output при сбое.
+  Проверены публичные parse/load/validate/merge, разрешение ссылок из дополнений
+  и неизменность базы. Тесты сверяют kind-specific инструкции/примеры с единым
+  контрактом правил пакета.
+- Merge детерминирован, не изменяет входные документы/snapshot, отказывает
+  на дубликатах и не повреждает output при сбое.
 - Context содержит каждую прямую ссылку выбранного профиля, соблюдает scope
   индекса и отказывает по бюджету без частичного результата; NPC/сюжет не
   получают таблицы спавнов и loadouts через выбранную локацию. Prompt разрешает
-  ссылки из индекса и требует результат только выбранной секции.
-- Проверена установка wheel в чистое окружение, CLI и ресурсы работают вне репо;
-  импорт/использование rpg_content не загружает core, мир загружается явным путём.
-- Сравнены прежний и JSON-каталог, порядки и результаты фиксированных seed;
-  narrative-локация не предлагается движку как место боя.
+  ссылки из индекса и требует результат только выбранной секции. Внешний Python
+  клиент строит context только публичным build_context без resource plumbing;
+  проверены его аргументы и ContextBudgetExceeded с actual_chars/max_chars.
+  Библиотечный API не пишет в stdout/stderr; CLI выводит размер и ошибки
+  и соблюдает exit codes.
 
 Этот документ задаёт будущую реализацию и не утверждает её готовность.
