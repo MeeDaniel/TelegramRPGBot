@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from random import Random
 
 from pathlib import Path
@@ -138,6 +139,9 @@ def play(game: GameService, battle, character: Character) -> None:
 
 
 def main() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description='Консольное демо независимого RPG-движка')
     parser.add_argument('--seed', type=int, default=None,
                         help='Seed for reproducible encounters, AI and loot')

@@ -1,11 +1,14 @@
 """The combat catalog is an independent projection of validated content."""
 
 import json
+from copy import deepcopy
+from random import Random
 
 import pytest
 
 from content_helpers import RARITIES, six_section_payload
 from core import Accessory, Armor, AttackType, Potion, Rarity, Superpower, Weapon
+from core.world import EncounterGenerator
 from rpg_content import ContentRef, parse, validate
 
 
@@ -81,3 +84,47 @@ def test_adapter_mutable_catalogs_never_share_world_or_each_other(world):
     assert len(second.locations['forest'].rarity_weights) == len(world.locations['forest'].rarity_weights) == 6
     assert tuple(second.loot_tables) == tuple(world.loot_tables) == ('drops',)
     assert second.items['sword'] is not world.items['sword']
+
+
+@pytest.mark.parametrize('weight', [1e308, 10**400], ids=['float', 'large-integer'])
+def test_adapter_generates_encounters_with_overflowing_rarity_weight_total(weight):
+    from core.content_adapter import to_catalog
+
+    payload = six_section_payload()
+    payload['locations'][0]['rarity_weights'] = dict.fromkeys(RARITIES, weight)
+    world = validate(parse(json.dumps(payload)))
+    generator = EncounterGenerator(to_catalog(world), Random(42))
+
+    for _ in range(20):
+        encounter = generator.generate('forest')
+        assert encounter.definition.id == 'wolf'
+        assert encounter.rarity.value in RARITIES
+
+    assert dict(world.locations['forest'].rarity_weights) == dict.fromkeys(RARITIES, weight)
+    assert tuple(spawn.weight for spawn in world.locations['forest'].spawns) == (2,)
+
+
+@pytest.mark.parametrize('weights', [(1e308, 1e308), (10**400, 10**400), (10**400, 1.0)],
+                         ids=['float', 'large-integer', 'mixed-integer-float'])
+def test_adapter_generates_encounters_with_overflowing_spawn_weight_total(weights):
+    from core.content_adapter import to_catalog
+
+    payload = six_section_payload()
+    second_monster = deepcopy(payload['monsters'][0])
+    second_monster['id'] = 'second_wolf'
+    payload['monsters'].append(second_monster)
+    payload['locations'][0]['spawns'] = [
+        {'monster': 'monsters:wolf', 'weight': weights[0]},
+        {'monster': 'monsters:second_wolf', 'weight': weights[1]},
+    ]
+    world = validate(parse(json.dumps(payload)))
+    generator = EncounterGenerator(to_catalog(world), Random(42))
+
+    for _ in range(20):
+        encounter = generator.generate('forest')
+        assert encounter.definition.id in ('wolf', 'second_wolf')
+        assert encounter.rarity.value in RARITIES
+
+    assert tuple(spawn.weight for spawn in world.locations['forest'].spawns) == weights
+    assert dict(world.locations['forest'].rarity_weights) == dict(
+        zip(RARITIES, (60, 25, 10, 4, .9, .1)))

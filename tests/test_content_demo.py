@@ -2,6 +2,9 @@
 
 import inspect
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -75,3 +78,18 @@ def test_main_loads_once_and_passes_world_service_to_console_boundary(monkeypatc
     assert len(loads) == len(consumed) == 1
     assert loads[0][0] == DEMO_PATH
     assert consumed[0] == (loads[0][1], support)
+
+
+def test_demo_cli_writes_utf8_when_inherited_encoding_is_cp1251():
+    environment = dict(os.environ, PYTHONIOENCODING='cp1251', PYTHONUTF8='0')
+    result = subprocess.run(
+        [sys.executable, str(ROOT / 'main.py'), '--seed', '42'],
+        input=b'1\n' * 30, capture_output=True, cwd=ROOT,
+        env=environment, timeout=15,
+    )
+
+    assert b'UnicodeEncodeError' not in result.stderr
+    assert result.returncode == 0
+    output = result.stdout.decode('utf-8')
+    assert 'ПОБЕДА!' in output
+    assert 'Игра завершена.' in output

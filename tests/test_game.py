@@ -257,14 +257,14 @@ def test_cli_smoke_run_and_cancel():
     root = Path(__file__).resolve().parents[1]
     result = subprocess.run(
         [sys.executable, str(root / 'main.py'), '--seed', '42'],
-        input='1\n' * 30, text=True, capture_output=True, cwd=root, timeout=15,
+        input='1\n' * 30, text=True, encoding='utf-8', capture_output=True, cwd=root, timeout=15,
     )
     assert result.returncode == 0
     assert 'ПОБЕДА!' in result.stdout
     assert 'Игра завершена.' in result.stdout
     cancel = subprocess.run(
         [sys.executable, str(root / 'main.py'), '--seed', '42'],
-        input='6\n', text=True, capture_output=True, cwd=root, timeout=15,
+        input='6\n', text=True, encoding='utf-8', capture_output=True, cwd=root, timeout=15,
     )
     assert cancel.returncode == 0
     assert 'Бой отменён.' in cancel.stdout

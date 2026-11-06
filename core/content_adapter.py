@@ -1,5 +1,8 @@
 """Project a validated content snapshot into independently owned combat models."""
 
+from math import isfinite
+from fractions import Fraction
+
 from rpg_content import ContentWorld
 
 from .models import (
@@ -10,6 +13,17 @@ from .world import (
     Catalog, EquipmentSpec, LocationDefinition, LootEntry, LootTable,
     MonsterDefinition, SpawnEntry,
 )
+
+
+def _sampling_weights(weights: tuple[float, ...]) -> tuple[float, ...]:
+    """Keep ordinary weights exact; rescale overflowing totals for sampling."""
+    try:
+        if isfinite(sum(weights)):
+            return weights
+    except OverflowError:
+        pass
+    scale = Fraction(max(weights))
+    return tuple(float(Fraction(weight) / scale) for weight in weights)
 
 
 def to_catalog(world: ContentWorld) -> Catalog:
@@ -58,11 +72,13 @@ def to_catalog(world: ContentWorld) -> Catalog:
 
     for definition in world.locations.values():
         if definition.mode == 'encounter':
+            spawn_weights = _sampling_weights(tuple(entry.weight for entry in definition.spawns))
+            rarity_weights = _sampling_weights(tuple(definition.rarity_weights.values()))
             catalog.locations[definition.id] = LocationDefinition(
                 id=definition.id, name=definition.name,
-                spawns=tuple(SpawnEntry(entry.monster.id, entry.weight)
-                             for entry in definition.spawns),
+                spawns=tuple(SpawnEntry(entry.monster.id, weight)
+                             for entry, weight in zip(definition.spawns, spawn_weights)),
                 rarity_weights={Rarity(rarity): weight
-                                for rarity, weight in definition.rarity_weights.items()},
+                                for rarity, weight in zip(definition.rarity_weights, rarity_weights)},
             )
     return catalog
