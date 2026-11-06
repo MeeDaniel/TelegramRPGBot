@@ -5,107 +5,20 @@ from __future__ import annotations
 import argparse
 from random import Random
 
+from pathlib import Path
+
+from rpg_content import ContentWorld, load
+
 from core import (
-    Accessory, Armor, Attack, AttackMode, AttackType, BattleStatus,
-    Catalog, Character, DrinkPotion, EquipmentSpec, GameService,
-    Guard, InvalidAction, LocationDefinition, LootEntry, LootTable,
-    MonsterDefinition, Potion, Rarity, SpawnEntry, StatBonus,
-    Superpower, UseSuperpower, Weapon,
+    Attack, AttackMode, AttackType, BattleStatus, Catalog, Character,
+    DrinkPotion, GameService, Guard, InvalidAction, UseSuperpower,
 )
+from core.content_adapter import to_catalog
 
 
 def create_content() -> Catalog:
-    """Demo content created in Python, with no external database or framework."""
-    catalog = Catalog()
-
-    def add(item):
-        catalog.items[item.id] = item
-
-    # The playable character's items.
-    add(Weapon(id='steel_sword', name='Стальной меч',
-               attack_type=AttackType.MELEE, bonus=StatBonus(melee_damage=24)))
-    add(Weapon(id='healing_staff', name='Посох целителя',
-               attack_type=AttackType.SUPPORT, support_heal=30,
-               bonus=StatBonus(melee_damage=9, magic_damage=5)))
-    add(Armor(id='travel_armor', name='Броня странника',
-              bonus=StatBonus(defense=18, max_health=35), guard_multiplier=2.0))
-    add(Accessory(id='power_ring', name='Кольцо силы',
-                  bonus=StatBonus(melee_damage=6, defense=5)))
-    add(Accessory(id='life_charm', name='Амулет здоровья',
-                  bonus=StatBonus(max_health=25, melee_damage=3)))
-    add(Superpower(id='battle_rage', name='Боевой азарт',
-                   effect_bonus=StatBonus(melee_damage=12, magic_damage=12,
-                                          ranged_damage=12), duration=2, cooldown=3))
-    add(Potion(id='healing_potion', name='Зелье лечения', heal_amount=50, cooldown=3))
-
-    add(Weapon(id='forest_blade', name='Лесной клинок',
-               attack_type=AttackType.MELEE, rarity=Rarity.RARE,
-               bonus=StatBonus(melee_damage=29)))
-    add(Accessory(id='forest_amulet', name='Амулет чащи',
-                  rarity=Rarity.RARE,
-                  bonus=StatBonus(max_health=20, defense=8)))
-
-    # Every monster type has equipment for EVERY rarity, with no base-stat overrides.
-    templates = [
-        ('slime', 'Слизень', 10, 0, 0),
-        ('wolf', 'Лесной волк', 14, 4, 15),
-        ('skeleton', 'Скелет', 17, 8, 25),
-        ('ancient_ent', 'Древний энт', 23, 14, 100),
-    ]
-    for monster_id, name, attack_base, armor_base, hp_base in templates:
-        loadouts = {}
-        for tier, rarity in enumerate(Rarity):
-            weapon_id = f'{monster_id}_weapon_{tier}'
-            armor_id = f'{monster_id}_armor_{tier}'
-            add(Weapon(id=weapon_id, name=f'Оружие: {name} ({rarity.label})',
-                       rarity=rarity, attack_type=AttackType.MELEE,
-                       bonus=StatBonus(melee_damage=attack_base + tier * 8)))
-            add(Armor(id=armor_id, name=f'Защита: {name} ({rarity.label})',
-                      rarity=rarity,
-                      bonus=StatBonus(defense=armor_base + tier * 7,
-                                      max_health=hp_base + tier * 38),
-                      guard_multiplier=1.7 + tier * 0.1))
-            loadouts[rarity] = EquipmentSpec(
-                weapon=weapon_id, armor=armor_id,
-                superpower='battle_rage' if tier >= 3 else None,
-                potion='healing_potion' if tier >= 4 else None,
-                potion_count=1 if tier >= 4 else 0,
-            )
-        catalog.monsters[monster_id] = MonsterDefinition(
-            id=monster_id, name=name, loadouts=loadouts,
-            loot_table_id=f'{monster_id}_loot',
-            is_boss=(monster_id == 'ancient_ent'),
-        )
-
-    catalog.loot_tables.update({
-        'slime_loot': LootTable('slime_loot', (
-            LootEntry('healing_potion', chance=.45, max_quantity=2),
-            LootEntry('forest_amulet', chance=.08),
-        )),
-        'wolf_loot': LootTable('wolf_loot', (
-            LootEntry('healing_potion', chance=.55),
-            LootEntry('forest_blade', chance=.10),
-        )),
-        'skeleton_loot': LootTable('skeleton_loot', (
-            LootEntry('healing_potion', chance=.65, max_quantity=2),
-            LootEntry('forest_blade', chance=.18),
-        )),
-        'ancient_ent_loot': LootTable('ancient_ent_loot', (
-            LootEntry('healing_potion', chance=1.0, min_quantity=2, max_quantity=3),
-            LootEntry('forest_blade', chance=.75),
-            LootEntry('forest_amulet', chance=.75),
-        )),
-    })
-    catalog.locations['forgotten_forest'] = LocationDefinition(
-        id='forgotten_forest', name='Забытый лес',
-        spawns=(SpawnEntry('slime', 48), SpawnEntry('wolf', 32),
-                SpawnEntry('skeleton', 17), SpawnEntry('ancient_ent', 3)),
-        rarity_weights={
-            Rarity.COMMON: 57, Rarity.UNCOMMON: 25, Rarity.RARE: 11,
-            Rarity.EPIC: 5, Rarity.LEGENDARY: 1.7, Rarity.MYTHIC: .3,
-        },
-    )
-    return catalog
+    """Compatibility entry point returning a fresh projection of the demo world."""
+    return to_catalog(load(Path(__file__).resolve().parent / 'content' / 'demo.json'))
 
 
 def create_player(game: GameService, support: bool) -> Character:
@@ -231,10 +144,15 @@ def main() -> None:
     parser.add_argument('--support', action='store_true',
                         help='Начать с оружием саппорта')
     args = parser.parse_args()
-    catalog = create_content()
-    game = GameService(catalog, rng=Random(args.seed))
-    player = create_player(game, args.support)
-    location = catalog.locations['forgotten_forest']
+    world = load(Path(__file__).resolve().parent / 'content' / 'demo.json')
+    game = GameService(to_catalog(world), rng=Random(args.seed))
+    run_cli(world, game, args.support)
+
+
+def run_cli(world: ContentWorld, game: GameService, support: bool) -> None:
+    """Present the demo using the shared snapshot and application service."""
+    player = create_player(game, support)
+    location = world.locations['forgotten_forest']
     print('=== Консольная RPG ===')
     print(f'Игрок: {player.name} | Локация: {location.name}')
     print('Оружие:', game.character_equipment(player).weapon.name)

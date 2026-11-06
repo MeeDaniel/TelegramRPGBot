@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "locations": [
+    {"id": "old_bridge", "name": "Старый мост", "mode": "narrative", "description": "Тихий мост у лесной тропы."}
+  ],
+  "npcs": [
+    {"id": "bridge_keeper", "name": "Смотритель моста", "role": "Проводник", "location": "locations:old_bridge", "lines": ["Тропа за мостом ещё видна."]}
+  ],
+  "story_seeds": [
+    {"id": "lost_trail", "name": "Исчезающая тропа", "premise": "Узнать, почему тропа за мостом исчезает к вечеру.", "hooks": ["Расспросить смотрителя."], "refs": ["npcs:bridge_keeper", "locations:old_bridge"]}
+  ]
+}
