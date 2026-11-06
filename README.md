@@ -5,7 +5,15 @@
 
 ## Быстрый запуск
 
-**Python 3.10+**, внешние зависимости не нужны.
+**Python 3.10+**. Из корня checkout установите оба локальных проекта:
+
+```bash
+python -m pip install ./packages/rpg_content .
+```
+
+Runtime использует стандартную библиотеку и локальный пакет `rpg-content`.
+Публикация пакетов на PyPI не требуется. Самостоятельный потребитель контента
+может установить только `python -m pip install ./packages/rpg_content`, без игры.
 
 ```bash
 python main.py
@@ -32,27 +40,26 @@ python main.py --seed 42 --support
 
 ## Тесты
 
-Если установлен `pytest`:
+Для разработки установите оба проекта и тестовые зависимости:
 
 ```bash
+python -m pip install -e ./packages/rpg_content -e ".[test]"
 python -m pytest -q
-```
-
-Для установки самого пакета в окружение:
-
-```bash
-python -m pip install -e .
 ```
 
 ## Структура
 
 ```text
-telegram_rpg/
+core/
     models.py     # предметы, инвентарь, участники, бой, действия и события
     engine.py     # проверки, одновременное разрешение, расчёт урона и защиты
     world.py      # монстры, локации, редкость, ИИ и независимые таблицы добычи
     service.py    # работа с персонажем, экипировкой и сражением; in-memory store
-main.py           # консольное демо с созданием контента
+    content_adapter.py # ContentWorld -> независимая боевая проекция Catalog
+packages/rpg_content/ # отдельно устанавливаемые модели, JSON-проверка, контекст и CLI
+content/demo.json     # внешний боевой каталог демо
+content/example_story.json # самостоятельный пример мирной локации, NPC и истории
+main.py           # composition root и консольное демо
 ARCHITECTURE.md   # UML и архитектурные решения
 ```
 
@@ -74,7 +81,7 @@ ARCHITECTURE.md   # UML и архитектурные решения
 
 - Только **одна PvE-встреча** в CLI. Боевой движок уже поддерживает несколько участников и две команды, однако отдельного CLI-лобби PvP и групповых рейдов нет.
 - Нет реальных Telegram/HTTP/DB адаптеров. `InMemoryStore` хранит всё до завершения процесса. При подключении конкурентного сервера хранилище нужно заменить транзакционным адаптером и добавить сериализацию.
-- Без производства: пример контента создаётся в `main.py`, а не загружается из YAML/JSON.
+- Демо читает внешний `content/demo.json`; NPC и сюжет описывают данные, без исполнения квестов и диалоговых ветвлений.
 - Суперсилы пока представлены только баффом характеристик; нет фаз боссов, сложных статусов, дебаффов, крафта, торговли и специальных механик аксессуаров.
 - В демо все предметы имеют заранее заданные бонусы; генерации случайных свойств отдельного экземпляра нет.
 - При командной отмене требуется голос всех активных живых людей; при выходе одного члена команды бой продолжается, если у команды остались участники.
@@ -84,7 +91,7 @@ ARCHITECTURE.md   # UML и архитектурные решения
 
 ```python
 from random import Random
-from telegram_rpg import GameService, Attack
+from core import GameService, Attack
 from main import create_content, create_player
 
 game = GameService(create_content(), rng=Random(42))
@@ -98,3 +105,84 @@ for event in events:
 ```
 
 См. [ARCHITECTURE.md](ARCHITECTURE.md) для диаграмм и точек расширения.
+
+## Контент как независимая библиотека
+
+`rpg-content` не импортирует игру, Telegram, базу данных или API нейросетей.
+После установки можно использовать его из любого каталога, явно передав путь
+к файлу мира. Следующий пример запускается из корня checkout:
+
+```python
+from rpg_content import ContentRef, load
+
+world = load("content/example_story.json")
+for location in world.locations.values():
+    print(location.id, location.name, location.description)
+    for npc in world.npcs_at(location.id):
+        print(npc.id, npc.name, npc.role, npc.lines)
+for npc in world.npcs.values():  # включает NPC без локации
+    print(npc.id, npc.location)
+keeper = world.resolve(ContentRef("npcs", "bridge_keeper"))
+print(keeper.name)
+```
+
+`ContentWorld` — глубоко неизменяемый snapshot с шестью секциями: `items`,
+`monsters`, `locations`, `loot_tables`, `npcs`, `story_seeds`. Mapping сохраняет
+порядок и даёт `KeyError` для неизвестного ID. `resolve` и `npcs_at` дают
+`UnknownContentReference`; для известной локации без NPC `npcs_at` возвращает `()`.
+NPC — описание, а не экземпляр `Character` или участник боя.
+
+Основной `main()` один раз читает `content/demo.json` по пути от `main.py`,
+создаёт `to_catalog(world)` и `GameService`, затем передаёт их в
+`run_cli(world, game, support)`. Совместимый `create_content()` самостоятельно
+возвращает новый Catalog. Catalog содержит только боевые локации, тогда как
+все мирные локации, NPC и истории остаются доступны через world. Будущий
+Telegram-адаптер получает те же `(world, game)`: читает данные через world,
+выполняет игровые команды через GameService.
+
+Нет hot reload: изменение JSON не меняет уже созданный snapshot и активную игру.
+Независимая программа получает тот же мир, только если явно загружает тот же файл.
+Wheel игры содержит `core`, а демо запускается из checkout; `main.py` и внешние
+JSON не поставляются как установленная команда.
+
+## Добавление контента через внешний ИИ
+
+Сначала проверьте исходные файлы и объедините демонстрационный бой с примером истории:
+
+```bash
+python -m rpg_content validate content/demo.json
+python -m rpg_content validate content/example_story.json
+python -m rpg_content merge content/demo.json content/example_story.json --output content/world.json
+```
+
+Выберите одну секцию результата, нужные полные записи (`--ref`) и точный индекс
+допустимых ссылок (`--index-ref`). Явные `--no-refs` и `--no-index` задают пустые
+наборы. Для NPC и историй контекст не раскрывает спавны и боевую экипировку.
+
+```bash
+python -m rpg_content context content/world.json --type npcs --task "Добавь нового путешественника у моста" --ref locations:old_bridge --index-ref npcs:bridge_keeper --max-chars 12000 --output content/prompt.txt
+```
+
+Размер считается в Unicode-символах всего текста, не токенах. При превышении
+бюджета команда отказывает без усечения; сократите scope или увеличьте лимит.
+Передайте текст внешней модели вручную и сохраните её ответ в UTF-8 JSON,
+например `content/addition.json`. Ответ должен содержать `schema_version: 1`
+и только новые записи секции `npcs`; существующие ID повторять нельзя.
+
+```bash
+python -m rpg_content validate content/addition.json --base content/world.json
+python -m rpg_content merge content/world.json content/addition.json --output content/extended.json
+```
+
+Merge только добавляет: любой повтор ID внутри секции — ошибка. Для изменения
+записи отредактируйте её исходный файл и снова проверьте мир. Непустые `canon`
+должны совпадать, ссылки разрешаются в итоговом мире. Новые зависимости других
+секций создавайте отдельными запросами до генерации зависимых записей.
+Библиотека также предоставляет `parse`, `validate`, `merge`, `build_context`
+через публичный `rpg_content`; внутренних импортов для потребителя не требуется.
+
+Файлы output должны отличаться от входов; запись атомарная после проверки.
+Коды CLI: 0 — успех, 1 — данные/ссылки/бюджет, 2 — аргументы, 3 — I/O.
+CLI пишет диагностику и размер контекста в stderr, библиотечный API молчит.
+Никаких вызовов API и расходов на ИИ во время игры нет; проверка не оценивает
+литературное качество, смысловые противоречия или игровой баланс.

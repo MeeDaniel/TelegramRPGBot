@@ -1,0 +1,1199 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "id": "steel_sword",
+      "name": "Стальной меч",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 24,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "healing_staff",
+      "name": "Посох целителя",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 9,
+        "magic_damage": 5,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "support",
+      "support_heal": 30,
+      "kind": "weapon"
+    },
+    {
+      "id": "travel_armor",
+      "name": "Броня странника",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 35,
+        "defense": 18
+      },
+      "guard_multiplier": 2.0,
+      "kind": "armor"
+    },
+    {
+      "id": "power_ring",
+      "name": "Кольцо силы",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 6,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 5
+      },
+      "kind": "accessory"
+    },
+    {
+      "id": "life_charm",
+      "name": "Амулет здоровья",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 3,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 25,
+        "defense": 0
+      },
+      "kind": "accessory"
+    },
+    {
+      "id": "battle_rage",
+      "name": "Боевой азарт",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "effect_bonus": {
+        "melee_damage": 12,
+        "magic_damage": 12,
+        "ranged_damage": 12,
+        "max_health": 0,
+        "defense": 0
+      },
+      "duration": 2,
+      "cooldown": 3,
+      "kind": "superpower"
+    },
+    {
+      "id": "healing_potion",
+      "name": "Зелье лечения",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "heal_amount": 50,
+      "cooldown": 3,
+      "kind": "potion"
+    },
+    {
+      "id": "forest_blade",
+      "name": "Лесной клинок",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 29,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "forest_amulet",
+      "name": "Амулет чащи",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 20,
+        "defense": 8
+      },
+      "kind": "accessory"
+    },
+    {
+      "id": "slime_weapon_0",
+      "name": "Оружие: Слизень (Обычный)",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 10,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "slime_armor_0",
+      "name": "Защита: Слизень (Обычный)",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "guard_multiplier": 1.7,
+      "kind": "armor"
+    },
+    {
+      "id": "slime_weapon_1",
+      "name": "Оружие: Слизень (Необычный)",
+      "rarity": "uncommon",
+      "bonus": {
+        "melee_damage": 18,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "slime_armor_1",
+      "name": "Защита: Слизень (Необычный)",
+      "rarity": "uncommon",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 38,
+        "defense": 7
+      },
+      "guard_multiplier": 1.8,
+      "kind": "armor"
+    },
+    {
+      "id": "slime_weapon_2",
+      "name": "Оружие: Слизень (Редкий)",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 26,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "slime_armor_2",
+      "name": "Защита: Слизень (Редкий)",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 76,
+        "defense": 14
+      },
+      "guard_multiplier": 1.9,
+      "kind": "armor"
+    },
+    {
+      "id": "slime_weapon_3",
+      "name": "Оружие: Слизень (Эпический)",
+      "rarity": "epic",
+      "bonus": {
+        "melee_damage": 34,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "slime_armor_3",
+      "name": "Защита: Слизень (Эпический)",
+      "rarity": "epic",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 114,
+        "defense": 21
+      },
+      "guard_multiplier": 2.0,
+      "kind": "armor"
+    },
+    {
+      "id": "slime_weapon_4",
+      "name": "Оружие: Слизень (Легендарный)",
+      "rarity": "legendary",
+      "bonus": {
+        "melee_damage": 42,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "slime_armor_4",
+      "name": "Защита: Слизень (Легендарный)",
+      "rarity": "legendary",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 152,
+        "defense": 28
+      },
+      "guard_multiplier": 2.1,
+      "kind": "armor"
+    },
+    {
+      "id": "slime_weapon_5",
+      "name": "Оружие: Слизень (Мифический)",
+      "rarity": "mythic",
+      "bonus": {
+        "melee_damage": 50,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "slime_armor_5",
+      "name": "Защита: Слизень (Мифический)",
+      "rarity": "mythic",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 190,
+        "defense": 35
+      },
+      "guard_multiplier": 2.2,
+      "kind": "armor"
+    },
+    {
+      "id": "wolf_weapon_0",
+      "name": "Оружие: Лесной волк (Обычный)",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 14,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "wolf_armor_0",
+      "name": "Защита: Лесной волк (Обычный)",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 15,
+        "defense": 4
+      },
+      "guard_multiplier": 1.7,
+      "kind": "armor"
+    },
+    {
+      "id": "wolf_weapon_1",
+      "name": "Оружие: Лесной волк (Необычный)",
+      "rarity": "uncommon",
+      "bonus": {
+        "melee_damage": 22,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "wolf_armor_1",
+      "name": "Защита: Лесной волк (Необычный)",
+      "rarity": "uncommon",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 53,
+        "defense": 11
+      },
+      "guard_multiplier": 1.8,
+      "kind": "armor"
+    },
+    {
+      "id": "wolf_weapon_2",
+      "name": "Оружие: Лесной волк (Редкий)",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 30,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "wolf_armor_2",
+      "name": "Защита: Лесной волк (Редкий)",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 91,
+        "defense": 18
+      },
+      "guard_multiplier": 1.9,
+      "kind": "armor"
+    },
+    {
+      "id": "wolf_weapon_3",
+      "name": "Оружие: Лесной волк (Эпический)",
+      "rarity": "epic",
+      "bonus": {
+        "melee_damage": 38,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "wolf_armor_3",
+      "name": "Защита: Лесной волк (Эпический)",
+      "rarity": "epic",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 129,
+        "defense": 25
+      },
+      "guard_multiplier": 2.0,
+      "kind": "armor"
+    },
+    {
+      "id": "wolf_weapon_4",
+      "name": "Оружие: Лесной волк (Легендарный)",
+      "rarity": "legendary",
+      "bonus": {
+        "melee_damage": 46,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "wolf_armor_4",
+      "name": "Защита: Лесной волк (Легендарный)",
+      "rarity": "legendary",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 167,
+        "defense": 32
+      },
+      "guard_multiplier": 2.1,
+      "kind": "armor"
+    },
+    {
+      "id": "wolf_weapon_5",
+      "name": "Оружие: Лесной волк (Мифический)",
+      "rarity": "mythic",
+      "bonus": {
+        "melee_damage": 54,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "wolf_armor_5",
+      "name": "Защита: Лесной волк (Мифический)",
+      "rarity": "mythic",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 205,
+        "defense": 39
+      },
+      "guard_multiplier": 2.2,
+      "kind": "armor"
+    },
+    {
+      "id": "skeleton_weapon_0",
+      "name": "Оружие: Скелет (Обычный)",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 17,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "skeleton_armor_0",
+      "name": "Защита: Скелет (Обычный)",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 25,
+        "defense": 8
+      },
+      "guard_multiplier": 1.7,
+      "kind": "armor"
+    },
+    {
+      "id": "skeleton_weapon_1",
+      "name": "Оружие: Скелет (Необычный)",
+      "rarity": "uncommon",
+      "bonus": {
+        "melee_damage": 25,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "skeleton_armor_1",
+      "name": "Защита: Скелет (Необычный)",
+      "rarity": "uncommon",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 63,
+        "defense": 15
+      },
+      "guard_multiplier": 1.8,
+      "kind": "armor"
+    },
+    {
+      "id": "skeleton_weapon_2",
+      "name": "Оружие: Скелет (Редкий)",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 33,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "skeleton_armor_2",
+      "name": "Защита: Скелет (Редкий)",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 101,
+        "defense": 22
+      },
+      "guard_multiplier": 1.9,
+      "kind": "armor"
+    },
+    {
+      "id": "skeleton_weapon_3",
+      "name": "Оружие: Скелет (Эпический)",
+      "rarity": "epic",
+      "bonus": {
+        "melee_damage": 41,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "skeleton_armor_3",
+      "name": "Защита: Скелет (Эпический)",
+      "rarity": "epic",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 139,
+        "defense": 29
+      },
+      "guard_multiplier": 2.0,
+      "kind": "armor"
+    },
+    {
+      "id": "skeleton_weapon_4",
+      "name": "Оружие: Скелет (Легендарный)",
+      "rarity": "legendary",
+      "bonus": {
+        "melee_damage": 49,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "skeleton_armor_4",
+      "name": "Защита: Скелет (Легендарный)",
+      "rarity": "legendary",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 177,
+        "defense": 36
+      },
+      "guard_multiplier": 2.1,
+      "kind": "armor"
+    },
+    {
+      "id": "skeleton_weapon_5",
+      "name": "Оружие: Скелет (Мифический)",
+      "rarity": "mythic",
+      "bonus": {
+        "melee_damage": 57,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "skeleton_armor_5",
+      "name": "Защита: Скелет (Мифический)",
+      "rarity": "mythic",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 215,
+        "defense": 43
+      },
+      "guard_multiplier": 2.2,
+      "kind": "armor"
+    },
+    {
+      "id": "ancient_ent_weapon_0",
+      "name": "Оружие: Древний энт (Обычный)",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 23,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "ancient_ent_armor_0",
+      "name": "Защита: Древний энт (Обычный)",
+      "rarity": "common",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 100,
+        "defense": 14
+      },
+      "guard_multiplier": 1.7,
+      "kind": "armor"
+    },
+    {
+      "id": "ancient_ent_weapon_1",
+      "name": "Оружие: Древний энт (Необычный)",
+      "rarity": "uncommon",
+      "bonus": {
+        "melee_damage": 31,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "ancient_ent_armor_1",
+      "name": "Защита: Древний энт (Необычный)",
+      "rarity": "uncommon",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 138,
+        "defense": 21
+      },
+      "guard_multiplier": 1.8,
+      "kind": "armor"
+    },
+    {
+      "id": "ancient_ent_weapon_2",
+      "name": "Оружие: Древний энт (Редкий)",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 39,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "ancient_ent_armor_2",
+      "name": "Защита: Древний энт (Редкий)",
+      "rarity": "rare",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 176,
+        "defense": 28
+      },
+      "guard_multiplier": 1.9,
+      "kind": "armor"
+    },
+    {
+      "id": "ancient_ent_weapon_3",
+      "name": "Оружие: Древний энт (Эпический)",
+      "rarity": "epic",
+      "bonus": {
+        "melee_damage": 47,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "ancient_ent_armor_3",
+      "name": "Защита: Древний энт (Эпический)",
+      "rarity": "epic",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 214,
+        "defense": 35
+      },
+      "guard_multiplier": 2.0,
+      "kind": "armor"
+    },
+    {
+      "id": "ancient_ent_weapon_4",
+      "name": "Оружие: Древний энт (Легендарный)",
+      "rarity": "legendary",
+      "bonus": {
+        "melee_damage": 55,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "ancient_ent_armor_4",
+      "name": "Защита: Древний энт (Легендарный)",
+      "rarity": "legendary",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 252,
+        "defense": 42
+      },
+      "guard_multiplier": 2.1,
+      "kind": "armor"
+    },
+    {
+      "id": "ancient_ent_weapon_5",
+      "name": "Оружие: Древний энт (Мифический)",
+      "rarity": "mythic",
+      "bonus": {
+        "melee_damage": 63,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 0,
+        "defense": 0
+      },
+      "attack_type": "melee",
+      "support_heal": 0,
+      "kind": "weapon"
+    },
+    {
+      "id": "ancient_ent_armor_5",
+      "name": "Защита: Древний энт (Мифический)",
+      "rarity": "mythic",
+      "bonus": {
+        "melee_damage": 0,
+        "magic_damage": 0,
+        "ranged_damage": 0,
+        "max_health": 290,
+        "defense": 49
+      },
+      "guard_multiplier": 2.2,
+      "kind": "armor"
+    }
+  ],
+  "monsters": [
+    {
+      "id": "slime",
+      "name": "Слизень",
+      "loadouts": {
+        "common": {
+          "weapon": "items:slime_weapon_0",
+          "armor": "items:slime_armor_0",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "uncommon": {
+          "weapon": "items:slime_weapon_1",
+          "armor": "items:slime_armor_1",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "rare": {
+          "weapon": "items:slime_weapon_2",
+          "armor": "items:slime_armor_2",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "epic": {
+          "weapon": "items:slime_weapon_3",
+          "armor": "items:slime_armor_3",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": null,
+          "potion_count": 0
+        },
+        "legendary": {
+          "weapon": "items:slime_weapon_4",
+          "armor": "items:slime_armor_4",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": "items:healing_potion",
+          "potion_count": 1
+        },
+        "mythic": {
+          "weapon": "items:slime_weapon_5",
+          "armor": "items:slime_armor_5",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": "items:healing_potion",
+          "potion_count": 1
+        }
+      },
+      "loot_table": "loot_tables:slime_loot",
+      "is_boss": false
+    },
+    {
+      "id": "wolf",
+      "name": "Лесной волк",
+      "loadouts": {
+        "common": {
+          "weapon": "items:wolf_weapon_0",
+          "armor": "items:wolf_armor_0",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "uncommon": {
+          "weapon": "items:wolf_weapon_1",
+          "armor": "items:wolf_armor_1",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "rare": {
+          "weapon": "items:wolf_weapon_2",
+          "armor": "items:wolf_armor_2",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "epic": {
+          "weapon": "items:wolf_weapon_3",
+          "armor": "items:wolf_armor_3",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": null,
+          "potion_count": 0
+        },
+        "legendary": {
+          "weapon": "items:wolf_weapon_4",
+          "armor": "items:wolf_armor_4",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": "items:healing_potion",
+          "potion_count": 1
+        },
+        "mythic": {
+          "weapon": "items:wolf_weapon_5",
+          "armor": "items:wolf_armor_5",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": "items:healing_potion",
+          "potion_count": 1
+        }
+      },
+      "loot_table": "loot_tables:wolf_loot",
+      "is_boss": false
+    },
+    {
+      "id": "skeleton",
+      "name": "Скелет",
+      "loadouts": {
+        "common": {
+          "weapon": "items:skeleton_weapon_0",
+          "armor": "items:skeleton_armor_0",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "uncommon": {
+          "weapon": "items:skeleton_weapon_1",
+          "armor": "items:skeleton_armor_1",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "rare": {
+          "weapon": "items:skeleton_weapon_2",
+          "armor": "items:skeleton_armor_2",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "epic": {
+          "weapon": "items:skeleton_weapon_3",
+          "armor": "items:skeleton_armor_3",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": null,
+          "potion_count": 0
+        },
+        "legendary": {
+          "weapon": "items:skeleton_weapon_4",
+          "armor": "items:skeleton_armor_4",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": "items:healing_potion",
+          "potion_count": 1
+        },
+        "mythic": {
+          "weapon": "items:skeleton_weapon_5",
+          "armor": "items:skeleton_armor_5",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": "items:healing_potion",
+          "potion_count": 1
+        }
+      },
+      "loot_table": "loot_tables:skeleton_loot",
+      "is_boss": false
+    },
+    {
+      "id": "ancient_ent",
+      "name": "Древний энт",
+      "loadouts": {
+        "common": {
+          "weapon": "items:ancient_ent_weapon_0",
+          "armor": "items:ancient_ent_armor_0",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "uncommon": {
+          "weapon": "items:ancient_ent_weapon_1",
+          "armor": "items:ancient_ent_armor_1",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "rare": {
+          "weapon": "items:ancient_ent_weapon_2",
+          "armor": "items:ancient_ent_armor_2",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": null,
+          "potion": null,
+          "potion_count": 0
+        },
+        "epic": {
+          "weapon": "items:ancient_ent_weapon_3",
+          "armor": "items:ancient_ent_armor_3",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": null,
+          "potion_count": 0
+        },
+        "legendary": {
+          "weapon": "items:ancient_ent_weapon_4",
+          "armor": "items:ancient_ent_armor_4",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": "items:healing_potion",
+          "potion_count": 1
+        },
+        "mythic": {
+          "weapon": "items:ancient_ent_weapon_5",
+          "armor": "items:ancient_ent_armor_5",
+          "accessory1": null,
+          "accessory2": null,
+          "superpower": "items:battle_rage",
+          "potion": "items:healing_potion",
+          "potion_count": 1
+        }
+      },
+      "loot_table": "loot_tables:ancient_ent_loot",
+      "is_boss": true
+    }
+  ],
+  "locations": [
+    {
+      "id": "forgotten_forest",
+      "name": "Забытый лес",
+      "mode": "encounter",
+      "spawns": [
+        {
+          "monster": "monsters:slime",
+          "weight": 48
+        },
+        {
+          "monster": "monsters:wolf",
+          "weight": 32
+        },
+        {
+          "monster": "monsters:skeleton",
+          "weight": 17
+        },
+        {
+          "monster": "monsters:ancient_ent",
+          "weight": 3
+        }
+      ],
+      "rarity_weights": {
+        "common": 57,
+        "uncommon": 25,
+        "rare": 11,
+        "epic": 5,
+        "legendary": 1.7,
+        "mythic": 0.3
+      }
+    }
+  ],
+  "loot_tables": [
+    {
+      "id": "slime_loot",
+      "name": "Добыча: slime_loot",
+      "entries": [
+        {
+          "chance": 0.45,
+          "min_quantity": 1,
+          "max_quantity": 2,
+          "item": "items:healing_potion"
+        },
+        {
+          "chance": 0.08,
+          "min_quantity": 1,
+          "max_quantity": 1,
+          "item": "items:forest_amulet"
+        }
+      ]
+    },
+    {
+      "id": "wolf_loot",
+      "name": "Добыча: wolf_loot",
+      "entries": [
+        {
+          "chance": 0.55,
+          "min_quantity": 1,
+          "max_quantity": 1,
+          "item": "items:healing_potion"
+        },
+        {
+          "chance": 0.1,
+          "min_quantity": 1,
+          "max_quantity": 1,
+          "item": "items:forest_blade"
+        }
+      ]
+    },
+    {
+      "id": "skeleton_loot",
+      "name": "Добыча: skeleton_loot",
+      "entries": [
+        {
+          "chance": 0.65,
+          "min_quantity": 1,
+          "max_quantity": 2,
+          "item": "items:healing_potion"
+        },
+        {
+          "chance": 0.18,
+          "min_quantity": 1,
+          "max_quantity": 1,
+          "item": "items:forest_blade"
+        }
+      ]
+    },
+    {
+      "id": "ancient_ent_loot",
+      "name": "Добыча: ancient_ent_loot",
+      "entries": [
+        {
+          "chance": 1.0,
+          "min_quantity": 2,
+          "max_quantity": 3,
+          "item": "items:healing_potion"
+        },
+        {
+          "chance": 0.75,
+          "min_quantity": 1,
+          "max_quantity": 1,
+          "item": "items:forest_blade"
+        },
+        {
+          "chance": 0.75,
+          "min_quantity": 1,
+          "max_quantity": 1,
+          "item": "items:forest_amulet"
+        }
+      ]
+    }
+  ]
+}
