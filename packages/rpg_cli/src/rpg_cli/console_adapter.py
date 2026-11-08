@@ -2,14 +2,23 @@ from .session import Session
 
 
 class ConsoleAdapter:
-    def __init__(self, session: Session, read=input, write=print):
+    def __init__(self, session: Session, read=input, write=print, new_screen=lambda *args, **kwargs: None):
         self.session = session
         self.read = read
         self.write = write
+        self.new_screen = new_screen
+        self._alerts: list[str] = []
+
+    def alert(self, message: str) -> None:
+        self._alerts.append(message)
 
     def run(self) -> None:
         try:
             while (view := self.session.view()) is not None:
+                self.new_screen()
+                alerts, self._alerts = self._alerts, []
+                for message in alerts:
+                    self.write(message)
                 self.write(view.text)
                 if view.input_prompt is not None:
                     self.write('Введите значение. /back — отменить ввод; /home — домой.')
@@ -29,7 +38,7 @@ class ConsoleAdapter:
                     if 1 <= index <= len(view.buttons):
                         self.session.select(view.buttons[index - 1].id)
                     else:
-                        self.write('Неверный выбор.')
+                        self.alert('Неверный выбор.')
         except (EOFError, KeyboardInterrupt):
             self.session.close()
             self.write('Выход.')
