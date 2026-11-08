@@ -84,12 +84,14 @@ def test_demo_cli_writes_utf8_when_inherited_encoding_is_cp1251():
     environment = dict(os.environ, PYTHONIOENCODING='cp1251', PYTHONUTF8='0')
     result = subprocess.run(
         [sys.executable, str(ROOT / 'main.py'), '--seed', '42'],
-        input=b'1\n' * 30, capture_output=True, cwd=ROOT,
+        input='1\nПутник\n1\n2\n1\n'.encode('utf-8') + b'1\n' * 30,
+        capture_output=True, cwd=ROOT,
         env=environment, timeout=15,
     )
 
     assert b'UnicodeEncodeError' not in result.stderr
     assert result.returncode == 0
     output = result.stdout.decode('utf-8')
+    assert 'Путник' in output
     assert 'ПОБЕДА!' in output
-    assert 'Игра завершена.' in output
+    assert 'Добыча:' in output
