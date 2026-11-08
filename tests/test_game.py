@@ -250,21 +250,25 @@ def test_new_encounter_starts_at_full_health():
     assert p2.current_hp == p2.stats(1).max_health
 
 
-def test_cli_smoke_run_and_cancel():
+def test_cli_smoke_creation_victory_and_home_surrender():
     import subprocess
     import sys
     from pathlib import Path
     root = Path(__file__).resolve().parents[1]
     result = subprocess.run(
         [sys.executable, str(root / 'main.py'), '--seed', '42'],
-        input='1\n' * 30, text=True, encoding='utf-8', capture_output=True, cwd=root, timeout=15,
+        input='1\nТестовый герой\n1\n2\n1\n' + '1\n' * 30,
+        text=True, encoding='utf-8', capture_output=True, cwd=root, timeout=15,
     )
     assert result.returncode == 0
+    assert 'Тестовый герой' in result.stdout
     assert 'ПОБЕДА!' in result.stdout
-    assert 'Игра завершена.' in result.stdout
-    cancel = subprocess.run(
+    assert 'Добыча:' in result.stdout
+    surrender = subprocess.run(
         [sys.executable, str(root / 'main.py'), '--seed', '42'],
-        input='6\n', text=True, encoding='utf-8', capture_output=True, cwd=root, timeout=15,
+        input='2\n2\n1\n/home\n3\n',
+        text=True, encoding='utf-8', capture_output=True, cwd=root, timeout=15,
     )
-    assert cancel.returncode == 0
-    assert 'Бой отменён.' in cancel.stdout
+    assert surrender.returncode == 0
+    assert 'ПОРАЖЕНИЕ!' in surrender.stdout
+    assert 'Бой отменён.' not in surrender.stdout
