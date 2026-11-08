@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rpg-cli"
+version = "0.1.0"
+description = "Screen-based console interface for the RPG core"
+requires-python = ">=3.10"
+dependencies = ["telegram-rpg-core>=0.1,<0.2", "rpg-content>=0.1,<0.2"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
