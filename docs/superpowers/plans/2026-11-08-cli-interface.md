@@ -17,9 +17,8 @@ Write tests/test_cli_session.py and tests/cli_helpers.py against public rpg_cli
 Session, CharacterPreset, Button, InputButton, Screen, ScreenView, ConsoleAdapter.
 create_session(world,game,presets,default_preset_id,default_name='Герой') builds initial
 name screen. Expose stable IDs documented in test helper. Constructors of button
-types match spec; generic integer input can use Session(initial_screen=screen,
-on_close=callback) as an alternative low-level constructor if necessary; settle
-this with implementer before coding. Test real core with small fixture data.
+types match spec; generic integer input uses Session(initial_screen, on_close)
+with a user-defined Screen, without test-only hooks. Test real core fixtures.
 Run RED tests, recording missing feature evidence. No production edits or commits.
 Report .superpowers/sdd/2026-11-08-cli-interface/task-1-report.md.
 
@@ -46,4 +45,3 @@ Update README and ARCHITECTURE with package install, API, factory registration
 contract, independent usage and FSA flow. Target tests then full pytest. Commit
 only task files. Final independent review whole branch incl OOP and isolation.
 After fixes and verification push feature branch and gh pr create --base main.
-
